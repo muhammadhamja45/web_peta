@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Location by TID</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Header Section -->
+    <header class="bg-blue-600 text-white py-4 shadow-md">
+        <div class="container mx-auto text-center">
+            <h1 class="text-3xl font-semibold">Search ATM Location by TID</h1>
+        </div>
+    </header>
+
+    <!-- Search Section -->
+    <section class="container mx-auto my-8">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-auto">
+            <label for="searchInput" class="block text-gray-700 text-lg font-medium mb-2">Enter TID:</label>
+            <div class="flex items-center space-x-4">
+                <input type="text" id="searchInput" class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="e.g. 111, 222, 333">
+                <button onclick="searchLocation()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Search</button>
+            </div>
+            <p id="notFoundMsg" class="text-red-500 mt-4 hidden">TID not found!</p>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="container mx-auto mb-8">
+        <div id="mapid" class="rounded-lg shadow-lg" style="height: 500px;"></div>
+    </section>
+
+    <!-- Table Section -->
+    <section class="container mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">ATM Location Data</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="w-1/4 px-4 py-2 text-left">TID</th>
+                            <th class="w-1/2 px-4 py-2 text-left">Address</th>
+                            <th class="w-1/4 px-4 py-2 text-left">Latitude</th>
+                            <th class="w-1/4 px-4 py-2 text-left">Longitude</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable" class="text-gray-700">
+                        <!-- Data will be populated here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Data from the Excel file
+        const locations = [
+            { tid: 111, lat: -6.292523, lon: 106.793785, address: "JL. RA KARTINI NO 29, Jakarta" },
+            { tid: 222, lat: -6.217935, lon: 106.813726, address: "JL. SUDIRMAN NO 10, Jakarta" },
+            { tid: 333, lat: -6.193017, lon: 106.821867, address: "JL. MH THAMRIN NO 15, Jakarta" },
+            { tid: 444, lat: -6.238193, lon: 106.827298, address: "JL. GATOT SUBROTO NO 20, Jakarta" },
+            { tid: 555, lat: -6.193146, lon: 106.884812, address: "JL. PEMUDA NO 5, Jakarta" }
+        ];
+
+        // Initialize the map
+        var mymap = L.map('mapid').setView([-6.200000, 106.816666], 11);
+
+        // Set up the OpenStreetMap layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mymap);
+
+        // Function to search and display location
+        function searchLocation() {
+            var searchValue = document.getElementById("searchInput").value;
+            var location = locations.find(loc => loc.tid == searchValue);
+            
+            if (location) {
+                document.getElementById("notFoundMsg").classList.add("hidden");
+                mymap.setView([location.lat, location.lon], 13);
+                L.marker([location.lat, location.lon]).addTo(mymap)
+                    .bindPopup(location.address)
+                    .openPopup();
+            } else {
+                document.getElementById("notFoundMsg").classList.remove("hidden");
+            }
+        }
+
+        // Populate the table with data
+        const dataTable = document.getElementById('dataTable');
+        locations.forEach(location => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="border px-4 py-2">${location.tid}</td>
+                <td class="border px-4 py-2">${location.address}</td>
+                <td class="border px-4 py-2">${location.lat}</td>
+                <td class="border px-4 py-2">${location.lon}</td>
+            `;
+            dataTable.appendChild(row);
+        });
+    </script>
+
+</body>
+</html>
